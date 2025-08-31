@@ -1,0 +1,44 @@
+import requests
+import matplotlib.pyplot as plt
+import datetime
+
+# OpenWeatherMap API key and city
+API_KEY = '1b81fec5d9e4f964c749a2709fded546'
+CITY = 'Delhi'
+URL = f'https://api.openweathermap.org/data/2.5/forecast?q={CITY}&appid={API_KEY}&units=metric'
+
+# Fetch data
+response = requests.get(URL)
+data = response.json()
+
+if response.status_code != 200:
+    print("Error fetching data:", data.get("message", "Unknown error"))
+else:
+    dates, temps, humidity = [], [], []
+
+    for forecast in data['list']:
+        dt = datetime.datetime.fromtimestamp(forecast['dt'])
+        dates.append(dt)
+        temps.append(forecast['main']['temp'])
+        humidity.append(forecast['main']['humidity'])
+
+    # Create figure with subplots
+    fig, axes = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
+
+    # Temperature plot
+    axes[0].plot(dates, temps, color='red', marker='o')
+    axes[0].set_title(f'Temperature Forecast for {CITY}')
+    axes[0].set_ylabel('Temperature (°C)')
+    axes[0].grid(True)
+
+    # Humidity plot
+    axes[1].plot(dates, humidity, color='blue', marker='o')
+    axes[1].set_title(f'Humidity Forecast for {CITY}')
+    axes[1].set_ylabel('Humidity (%)')
+    axes[1].set_xlabel('Date and Time')
+    axes[1].grid(True)
+
+    # Format x-axis dates
+    fig.autofmt_xdate()
+    plt.tight_layout()
+    plt.show()
